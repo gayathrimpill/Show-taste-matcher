@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Show Taste Matcher</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="page">
+        <header>
+            <h1>Show Taste Matcher</h1>
+            <p class="subtitle">Search by title or genre, pick up to 5 favorites, and get matched with your next watch.</p>
+        </header>
+
+        <section class="search-section">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search a title (e.g. 'The Office') or a genre (e.g. 'comedy')..."
+                hx-get="/search"
+                hx-trigger="keyup changed delay:300ms"
+                hx-target="#search-results"
+                autocomplete="off"
+            />
+            <div id="search-results" class="poster-grid"></div>
+        </section>
+
+        <section class="tray-section">
+            <h2>Your picks <span class="count-badge"><span id="pick-count">0</span>/5</span></h2>
+            <div id="selected-tray" class="poster-grid empty-tray">
+                <p class="empty-state">Search above and click a poster to add it here.</p>
+            </div>
+
+            <form hx-post="/recommend" hx-target="#recommendations" hx-swap="innerHTML" hx-indicator="#loading">
+                <input type="hidden" name="show_ids" id="show-ids-input" value="">
+                <button type="submit">Get Recommendations</button>
+            </form>
+            <p id="loading" class="htmx-indicator">Finding your matches — this can take a few seconds for new shows...</p>
+        </section>
+
+        <section class="results-section">
+            <h2>Recommended for you</h2>
+            <div id="recommendations" class="card-grid">
+                <p class="empty-state">Your recommendations will appear here.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let selected = [];
+
+        function toggleSelect(id, name, posterUrl) {
+            const idx = selected.findIndex(s => s.id === id);
+            if (idx >= 0) {
+                selected.splice(idx, 1);
+            } else {
+                if (selected.length >= 5) {
+                    alert("You can only pick up to 5 shows.");
+                    return;
+                }
+                selected.push({ id, name, posterUrl });
+            }
+            renderTray();
+        }
+
+        function renderTray() {
+            const tray = document.getElementById("selected-tray");
+            if (selected.length === 0) {
+                tray.innerHTML = `<p class="empty-state">Search above and click a poster to add it here.</p>`;
+                tray.classList.add("empty-tray");
+            } else {
+                tray.classList.remove("empty-tray");
+                tray.innerHTML = selected.map(s => `
+                    <div class="poster-card selected" onclick="toggleSelect(${s.id}, '${s.name.replace(/'/g, "\\'")}', '${s.posterUrl || ''}')">
+                        ${s.posterUrl ? `<img src="${s.posterUrl}" alt="${s.name}">` : `<div class="no-poster">${s.name}</div>`}
+                        <p>${s.name}</p>
+                        <span class="remove-badge">×</span>
+                    </div>
+                `).join("");
+            }
+            document.getElementById("pick-count").innerText = selected.length;
+            document.getElementById("show-ids-input").value = selected.map(s => s.id).join(",");
+        }
+    </script>
+</body>
+</html>

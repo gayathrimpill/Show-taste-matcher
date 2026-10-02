@@ -1,0 +1,12 @@
+{% for show in results %}
+<div class="poster-card" onclick="toggleSelect({{ show.id }}, '{{ show.name.replace("'", "\\'") }}', '{{ show.poster_url or '' }}')">
+    {% if show.poster_url %}
+        <img src="{{ show.poster_url }}" alt="{{ show.name }}">
+    {% else %}
+        <div class="no-poster">{{ show.name }}</div>
+    {% endif %}
+    <p>{{ show.name }}</p>
+</div>
+{% else %}
+<p class="empty-state">No matches yet — try a different title.</p>
+{% endfor %}
