@@ -1,7 +1,10 @@
 fastapi
 uvicorn
 jinja2
+python-multipart
 requests
 duckdb
 python-dotenv
+numpy
 scikit-learn
+sentence-transformers
