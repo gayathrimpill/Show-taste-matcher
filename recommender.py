@@ -4,21 +4,17 @@ Shared recommendation logic, used by the FastAPI app.
 
 import duckdb
 import numpy as np
+from functools import lru_cache
 from sentence_transformers import SentenceTransformer
 
+@lru_cache(maxsize=1)
+def get_model():
+    return SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+    
 DB_PATH = "shows.duckdb"
 TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342"
 GENRE_WEIGHT = 0.3
 TAG_WEIGHT = 0.7
-
-_model = None
-
-
-def get_model():
-    global _model
-    if _model is None:
-        _model = SentenceTransformer("all-MiniLM-L6-v2")
-    return _model
 
 
 def load_all_shows():
